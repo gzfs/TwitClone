@@ -4,6 +4,7 @@ import {
   json,
 } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
+import { useState } from "react";
 import { type GoogleProfile } from "remix-auth-socials";
 import Navbar from "~/components/Navbar";
 import PostTweet from "~/components/PostTweet";
@@ -22,6 +23,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   return json({
     userSession,
+    initialPosts: []
   });
 }
 
@@ -33,7 +35,8 @@ export const meta: MetaFunction = () => {
 };
 
 export default function Index() {
-  const { userSession } = useLoaderData<typeof loader>();
+  const { userSession, initialPosts } = useLoaderData<typeof loader>();
+  const [initPosts, setInitPosts] = useState(initialPosts);
   return (
     <main className="grid sm:grid-cols-9 py-5 sm:py-12 px-2 dm:px-0 font-Montserrat">
       <div className="col-span-1 h-full m-2 rounded-xl hidden sm:block">
@@ -44,7 +47,11 @@ export default function Index() {
       </div>
       <div className="lg:col-span-4 sm:col-span-5  h-full m-2 rounded-xl">
         <PostTweet />
-        <Tweet />
+        {
+          initPosts.map((initPost) => {
+            return <Tweet />
+          })
+        }
       </div>
       <div className="col-span-3 h-full m-2 rounded-xl hidden lg:flex flex-col py-4 px-8">
         <SearchBar />

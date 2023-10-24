@@ -62,7 +62,7 @@ export default function Sidebar({
             </button>
           </Form>
         ) : (
-          <Link to="/profile">
+          <Link to="/home/profile">
             <button>
               <img
                 src={userSession.photos[0].value}

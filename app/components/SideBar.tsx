@@ -2,9 +2,7 @@ import { Form, Link } from "@remix-run/react";
 import { type SVGProps } from "react";
 import { type GoogleProfile } from "remix-auth-socials";
 
-export function IcBaselineAccountCircle(
-  props: SVGProps<SVGSVGElement>
-) {
+export function IcBaselineAccountCircle(props: SVGProps<SVGSVGElement>) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -26,46 +24,29 @@ export default function Sidebar({
 }: {
   userSession: GoogleProfile;
 }) {
-  console.log(userSession);
-
   return (
     <div className="grid grid-rows-7 fixed h-full pl-10">
       <div className="row-span-1">
         <Link to="/">
-          <img
-            src="/assets/images/Twitter.png"
-            width="30px"
-            alt="Twitter"
-          />
+          <img src="/assets/images/Twitter.png" width="30px" alt="Twitter" />
         </Link>
       </div>
       <div className="row-span-4"></div>
       <div className="row-span-1 grid grid-rows-2 h-fit place-content-center">
         <div>
-          <img
-            src="/assets/images/image.png"
-            alt="Message"
-            width="25px"
-          />
+          <img src="/assets/images/image.png" alt="Message" width="25px" />
         </div>
         {!userSession ? (
-          <Form
-            action="/auth/google"
-            method="POST"
-            className="mt-2 w-full"
-          >
+          <Form action="/auth/google" method="POST" className="mt-2 w-full">
             <button>
-              <IcBaselineAccountCircle
-                color="#ff5f7a"
-                className="text-3xl"
-              />
+              <IcBaselineAccountCircle color="#ff5f7a" className="text-3xl" />
             </button>
           </Form>
         ) : (
           <Link to="/home/profile">
             <button>
               <img
-                src={userSession.photos[0].value}
+                src={userSession._json.picture}
                 alt="Profile"
                 width={30}
                 className="rounded-full mt-2"

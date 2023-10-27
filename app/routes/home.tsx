@@ -7,12 +7,9 @@ import { Outlet, useLoaderData } from "@remix-run/react";
 import { useState } from "react";
 import { type GoogleProfile } from "remix-auth-socials";
 import Navbar from "~/components/Navbar";
-import PostTweet from "~/components/PostTweet";
 import Recommended from "~/components/Recommended";
 import SearchBar from "~/components/SearchBar";
 import Sidebar from "~/components/SideBar";
-import Trending from "~/components/Trending";
-import Tweet from "~/components/Tweet";
 import { remixAuthenticator } from "~/services/auth.server";
 
 export async function loader({ request }: LoaderFunctionArgs) {

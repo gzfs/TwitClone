@@ -1,9 +1,9 @@
 import { LoaderFunctionArgs, json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
-import { useState } from "react";
 import { GoogleProfile } from "remix-auth-socials";
 import Tweet from "~/components/Tweet";
 import { remixAuthenticator } from "~/services/auth.server";
+import { dbClient } from "~/services/prisma";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const userSession: GoogleProfile = (await remixAuthenticator.isAuthenticated(
@@ -13,26 +13,53 @@ export async function loader({ request }: LoaderFunctionArgs) {
     }
   )) as GoogleProfile;
 
+  const userData = (
+    await dbClient.user.findMany({
+      where: {
+        Email: userSession.emails[0].value,
+      },
+    })
+  )[0];
+
+  const userFollowers = await dbClient.followers.findMany({
+    where: {
+      followingID: userData.ID,
+    },
+  });
+
+  const userFollowing = await dbClient.followers.findMany({
+    where: {
+      followerID: userData.ID,
+    },
+  });
+
+  const initialPosts = await dbClient.tweet.findMany({
+    where: {
+      userID: userData.ID,
+    },
+    include: {
+      Replies: {
+        include: {
+          User: true,
+        },
+      },
+      User: true,
+      Likes: true,
+    },
+  });
+
   return json({
     userSession,
-    initialPosts: [
-      {
-        postComments: [{}],
-        postContent:
-          "Javascript Sucks. Dart is the new thing. I need Monads in Javascript",
-        postLikes: 20,
-        postSeconds: 40,
-        postUser: "Vishal Murugan",
-        postImage:
-          "https://images.unsplash.com/photo-1685825631222-6bfdc760d39c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1472&q=80",
-      },
-    ],
+    initialPosts,
+    userFollowers,
+    userFollowing,
+    userData,
   });
 }
 
 export default function Profile() {
-  const { userSession, initialPosts } = useLoaderData<typeof loader>();
-  const [initPosts, setInitPosts] = useState(initialPosts);
+  const { userSession, initialPosts, userFollowers, userFollowing, userData } =
+    useLoaderData<typeof loader>();
   return (
     <section className="text-[#5a3434] font-Montserrat py-10 px-5 sm:py-0 sm:px-0">
       <p className="text-5xl font-bold pb-10">Profile</p>
@@ -44,20 +71,17 @@ export default function Profile() {
             className="rounded-full"
           />
           <div className="ml-4">
-            <p className="pt-4 text-xl font-bold">{userSession.displayName}</p>
-            <p>@gzfs</p>
+            <p className="pt-4 text-xl font-bold">{userData.Name}</p>
+            <p>@{userData.Handle}</p>
           </div>
-        </div>
-        <div className="bg-[#333333] px-8 py-4 rounded-full text-white text-xs">
-          Edit Profile
         </div>
       </div>
       <div className="flex items-center pt-10">
         <p>
-          <b>69</b> Following
+          <b>{userFollowing.length}</b> Following
         </p>
         <p className="ml-4">
-          <b>420</b> Followers
+          <b>{userFollowers.length}</b> Followers
         </p>
       </div>
       <div className="grid grid-cols-4 gap-x-4 py-6">
@@ -75,17 +99,8 @@ export default function Profile() {
         </div>
       </div>
       <div>
-        {initPosts.map((initPost) => {
-          return (
-            <Tweet
-              postComments={initPost.postComments}
-              postContent={initPost.postContent}
-              postLikes={initPost.postLikes}
-              postSeconds={initPost.postSeconds}
-              postUser={initPost.postUser}
-              postImage={initPost.postImage}
-            />
-          );
+        {initialPosts.map((initPost) => {
+          return <Tweet tweetInformation={initPost} key={initPost.ID} />;
         })}
       </div>
     </section>

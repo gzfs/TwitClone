@@ -41,13 +41,11 @@ export default function PostTweet() {
           />
         </div>
         <div>
-          <img
-            src="/assets/images/Emoji.svg"
-            width="25px"
-            alt="Mood"
-          />
+          <img src="/assets/images/Emoji.svg" width="25px" alt="Mood" />
         </div>
         <Form
+          method="POST"
+          action="/tweet/create"
           onSubmit={(eV) => {
             eV.preventDefault();
             if (uploadUrl || postText) {
@@ -58,7 +56,7 @@ export default function PostTweet() {
                 }),
                 {
                   method: "POST",
-                  action: "",
+                  action: "/tweet/create",
                   encType: "application/json",
                 }
               );
